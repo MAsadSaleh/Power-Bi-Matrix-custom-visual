@@ -1,0 +1,23 @@
+{
+  "visual": {
+    "name": "matrixVisualReplica",
+    "displayName": "Matrix Visual Replica",
+    "guid": "matrixVisualReplica1234567890ABCDEF",
+    "visualClassName": "MatrixVisualReplica",
+    "version": "1.0.0.0",
+    "description": "A custom Power BI visual that fully replicates the native Matrix visual with 100% feature parity",
+    "supportUrl": "https://github.com",
+    "gitHubUrl": ""
+  },
+  "apiVersion": "5.10.0",
+  "author": {
+    "name": "Matrix Visual Replica",
+    "email": "support@example.com"
+  },
+  "assets": {
+    "icon": "assets/icon.png"
+  },
+  "externalJS": [],
+  "style": "style/visual.less",
+  "capabilities": "capabilities.json"
+}

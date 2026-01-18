@@ -1,0 +1,1 @@
+{"version":3,"file":"visualPlugin.d.ts","sourceRoot":"","sources":["../../precompile/visualPlugin.ts"],"names":[],"mappings":"AACA,OAAO,iBAAiB,MAAM,qBAAqB,CAAC;AACpD,OAAO,aAAa,GAAG,iBAAiB,CAAC,OAAO,CAAC,OAAO,CAAC,aAAa,CAAC;AAKvE,QAAA,IAAI,mCAAmC,EAAE,aAkBxC,CAAC;AAMF,eAAe,mCAAmC,CAAC"}

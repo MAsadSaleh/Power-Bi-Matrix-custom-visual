@@ -1,0 +1,113 @@
+/*
+ * Matrix Visual - Exact styling matching native Power BI Matrix
+ */
+
+.matrix-visual-container {
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    color: #212121;
+    background-color: #ffffff;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.matrix-table-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+.matrix-header-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.matrix-body-wrapper {
+    position: relative;
+}
+
+.matrix-row-header-wrapper {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 11;
+    background-color: #ffffff;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.matrix-header-table,
+.matrix-body-table,
+.matrix-row-header-table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: auto;
+    font-size: 11px;
+}
+
+.matrix-header-table th,
+.matrix-body-table td,
+.matrix-row-header-table td {
+    border: 1px solid #e0e0e0;
+    padding: 8px;
+    white-space: nowrap;
+}
+
+.matrix-header-table th {
+    background-color: #f8f8f8;
+    font-weight: 600;
+    text-align: center;
+    position: sticky;
+    top: 0;
+}
+
+.matrix-row-header-table td {
+    background-color: #ffffff;
+    text-align: left;
+    font-weight: normal;
+}
+
+.matrix-body-table td {
+    background-color: #ffffff;
+    text-align: right;
+    font-size: 11px;
+}
+
+.expand-indicator {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    text-align: center;
+    line-height: 16px;
+    cursor: pointer;
+    user-select: none;
+    font-weight: bold;
+    font-size: 14px;
+    color: #212121;
+    
+    &:hover {
+        background-color: #f0f0f0;
+        border-radius: 2px;
+    }
+}
+
+.subtotal-row td,
+.subtotal-cell {
+    background-color: #f0f0f0;
+    font-weight: 600;
+}
+
+.data-row:nth-child(even) td {
+    background-color: #fafafa;
+}
+
+.data-row:nth-child(odd) td {
+    background-color: #ffffff;
+}

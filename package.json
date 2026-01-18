@@ -1,0 +1,31 @@
+{
+  "name": "matrix-visual-replica",
+  "version": "1.0.0",
+  "description": "Custom Power BI visual that fully replicates the native Matrix visual",
+  "main": "dist/bundle.js",
+  "scripts": {
+    "build": "pbiviz package",
+    "start": "pbiviz start",
+    "lint": "eslint . --ext .ts",
+    "test": "jest"
+  },
+  "keywords": [
+    "powerbi",
+    "visual",
+    "matrix",
+    "table"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "powerbi-visuals-api": "~5.10.0"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "powerbi-visuals-tools": "^5.0.0",
+    "typescript": "^5.0.0"
+  }
+}

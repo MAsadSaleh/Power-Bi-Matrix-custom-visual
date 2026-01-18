@@ -1,0 +1,512 @@
+{
+  "privileges": [],
+  "dataRoles": [
+    {
+      "displayName": "Rows",
+      "name": "rows",
+      "kind": "Grouping",
+      "requiredTypes": [
+        {
+          "numeric": true
+        },
+        {
+          "text": true
+        }
+      ]
+    },
+    {
+      "displayName": "Columns",
+      "name": "columns",
+      "kind": "Grouping",
+      "requiredTypes": [
+        {
+          "numeric": true
+        },
+        {
+          "text": true
+        }
+      ]
+    },
+    {
+      "displayName": "Values",
+      "name": "values",
+      "kind": "Measure",
+      "requiredTypes": [
+        {
+          "numeric": true
+        }
+      ]
+    }
+  ],
+  "dataViewMappings": [
+    {
+      "matrix": {
+        "rows": {
+          "for": {
+            "in": "rows"
+          },
+          "dataReductionAlgorithm": {
+            "top": {}
+          }
+        },
+        "columns": {
+          "for": {
+            "in": "columns"
+          },
+          "dataReductionAlgorithm": {
+            "top": {}
+          }
+        },
+        "values": {
+          "for": {
+            "in": "values"
+          }
+        }
+      }
+    }
+  ],
+  "objects": {
+    "general": {
+      "displayName": "General",
+      "properties": {
+        "formatString": {
+          "type": {
+            "formatting": {
+              "formatString": true
+            }
+          }
+        }
+      }
+    },
+    "rowHeaders": {
+      "displayName": "Row headers",
+      "properties": {
+        "fontFamily": {
+          "type": {
+            "text": true
+          },
+          "displayName": "Font family"
+        },
+        "fontSize": {
+          "type": {
+            "numeric": true
+          },
+          "displayName": "Font size"
+        },
+        "fontColor": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          },
+          "displayName": "Font color"
+        },
+        "backgroundColor": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          },
+          "displayName": "Background color"
+        },
+        "wordWrap": {
+          "type": {
+            "bool": true
+          },
+          "displayName": "Word wrap"
+        },
+        "alignment": {
+          "type": {
+            "enumeration": [
+              {
+                "displayName": "Left",
+                "value": "left"
+              },
+              {
+                "displayName": "Center",
+                "value": "center"
+              },
+              {
+                "displayName": "Right",
+                "value": "right"
+              }
+            ]
+          },
+          "displayName": "Alignment"
+        },
+        "border": {
+          "type": {
+            "bool": true
+          },
+          "displayName": "Show border"
+        }
+      }
+    },
+    "columnHeaders": {
+      "displayName": "Column headers",
+      "properties": {
+        "fontFamily": {
+          "type": {
+            "text": true
+          },
+          "displayName": "Font family"
+        },
+        "fontSize": {
+          "type": {
+            "numeric": true
+          },
+          "displayName": "Font size"
+        },
+        "fontColor": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          },
+          "displayName": "Font color"
+        },
+        "backgroundColor": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          },
+          "displayName": "Background color"
+        },
+        "wordWrap": {
+          "type": {
+            "bool": true
+          },
+          "displayName": "Word wrap"
+        },
+        "alignment": {
+          "type": {
+            "enumeration": [
+              {
+                "displayName": "Left",
+                "value": "left"
+              },
+              {
+                "displayName": "Center",
+                "value": "center"
+              },
+              {
+                "displayName": "Right",
+                "value": "right"
+              }
+            ]
+          },
+          "displayName": "Alignment"
+        },
+        "border": {
+          "type": {
+            "bool": true
+          },
+          "displayName": "Show border"
+        }
+      }
+    },
+    "values": {
+      "displayName": "Values",
+      "properties": {
+        "fontFamily": {
+          "type": {
+            "text": true
+          },
+          "displayName": "Font family"
+        },
+        "fontSize": {
+          "type": {
+            "numeric": true
+          },
+          "displayName": "Font size"
+        },
+        "fontColor": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          },
+          "displayName": "Font color"
+        },
+        "backgroundColor": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          },
+          "displayName": "Background color"
+        },
+        "alignment": {
+          "type": {
+            "enumeration": [
+              {
+                "displayName": "Left",
+                "value": "left"
+              },
+              {
+                "displayName": "Center",
+                "value": "center"
+              },
+              {
+                "displayName": "Right",
+                "value": "right"
+              }
+            ]
+          },
+          "displayName": "Alignment"
+        },
+        "numberFormat": {
+          "type": {
+            "formatting": {
+              "formatString": true
+            }
+          },
+          "displayName": "Number format"
+        },
+        "decimalPlaces": {
+          "type": {
+            "numeric": true
+          },
+          "displayName": "Decimal places"
+        },
+        "conditionalFormatting": {
+          "type": {
+            "enumeration": [
+              {
+                "displayName": "None",
+                "value": "none"
+              },
+              {
+                "displayName": "Background color",
+                "value": "background"
+              },
+              {
+                "displayName": "Font color",
+                "value": "font"
+              },
+              {
+                "displayName": "Data bars",
+                "value": "dataBars"
+              },
+              {
+                "displayName": "Icons",
+                "value": "icons"
+              }
+            ]
+          },
+          "displayName": "Conditional formatting"
+        }
+      }
+    },
+    "grid": {
+      "displayName": "Grid",
+      "properties": {
+        "gridlines": {
+          "type": {
+            "bool": true
+          },
+          "displayName": "Show gridlines"
+        },
+        "horizontalGridlines": {
+          "type": {
+            "bool": true
+          },
+          "displayName": "Horizontal gridlines"
+        },
+        "verticalGridlines": {
+          "type": {
+            "bool": true
+          },
+          "displayName": "Vertical gridlines"
+        },
+        "rowBanding": {
+          "type": {
+            "bool": true
+          },
+          "displayName": "Row banding"
+        },
+        "columnBanding": {
+          "type": {
+            "bool": true
+          },
+          "displayName": "Column banding"
+        },
+        "bandingColor": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          },
+          "displayName": "Banding color"
+        },
+        "padding": {
+          "type": {
+            "numeric": true
+          },
+          "displayName": "Padding"
+        },
+        "outlineStyle": {
+          "type": {
+            "enumeration": [
+              {
+                "displayName": "Stepped",
+                "value": "stepped"
+              },
+              {
+                "displayName": "None",
+                "value": "none"
+              }
+            ]
+          },
+          "displayName": "Outline style"
+        }
+      }
+    },
+    "totals": {
+      "displayName": "Totals",
+      "properties": {
+        "showRowSubtotals": {
+          "type": {
+            "bool": true
+          },
+          "displayName": "Show row subtotals"
+        },
+        "showColumnSubtotals": {
+          "type": {
+            "bool": true
+          },
+          "displayName": "Show column subtotals"
+        },
+        "showRowGrandTotals": {
+          "type": {
+            "bool": true
+          },
+          "displayName": "Show row grand totals"
+        },
+        "showColumnGrandTotals": {
+          "type": {
+            "bool": true
+          },
+          "displayName": "Show column grand totals"
+        },
+        "subtotalFontFamily": {
+          "type": {
+            "text": true
+          },
+          "displayName": "Subtotal font family"
+        },
+        "subtotalFontSize": {
+          "type": {
+            "numeric": true
+          },
+          "displayName": "Subtotal font size"
+        },
+        "subtotalFontColor": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          },
+          "displayName": "Subtotal font color"
+        },
+        "subtotalBackgroundColor": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          },
+          "displayName": "Subtotal background color"
+        },
+        "grandTotalFontFamily": {
+          "type": {
+            "text": true
+          },
+          "displayName": "Grand total font family"
+        },
+        "grandTotalFontSize": {
+          "type": {
+            "numeric": true
+          },
+          "displayName": "Grand total font size"
+        },
+        "grandTotalFontColor": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          },
+          "displayName": "Grand total font color"
+        },
+        "grandTotalBackgroundColor": {
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          },
+          "displayName": "Grand total background color"
+        }
+      }
+    },
+    "sorting": {
+      "displayName": "Sorting",
+      "properties": {
+        "sortBy": {
+          "type": {
+            "enumeration": [
+              {
+                "displayName": "By hierarchy",
+                "value": "hierarchy"
+              },
+              {
+                "displayName": "By value",
+                "value": "value"
+              }
+            ]
+          },
+          "displayName": "Sort by"
+        },
+        "sortDirection": {
+          "type": {
+            "enumeration": [
+              {
+                "displayName": "Ascending",
+                "value": "asc"
+              },
+              {
+                "displayName": "Descending",
+                "value": "desc"
+              }
+            ]
+          },
+          "displayName": "Sort direction"
+        }
+      }
+    }
+  },
+  "supportsMultiVisualSelection": true,
+  "supportsHighlight": true,
+  "supportsKeyboardFocus": true
+}
