@@ -40,31 +40,24 @@
   ],
   "dataViewMappings": [
     {
-      "matrix": {
-        "rows": {
-          "for": {
-            "in": "rows"
-          },
-          "dataReductionAlgorithm": {
-            "top": {}
-          }
-        },
-        "columns": {
-          "for": {
-            "in": "columns"
-          },
-          "dataReductionAlgorithm": {
-            "top": {}
-          }
-        },
-        "values": {
-          "for": {
-            "in": "values"
-          }
+        "matrix": {
+            "rows": {
+                "for": { "in": "Rows" }
+            },
+            "columns": {
+                "for": { "in": "Columns" }
+            },
+            "values": {
+                "select": [{ "for": { "in": "Values" } }]
+            }
         }
-      }
     }
-  ],
+],
+"expandCollapse": {
+    "roles": ["Rows"],
+    "addDataViewFlags": { "defaultValue": true }
+},
+"drilldown": { "roles": ["Rows"] },
   "objects": {
     "general": {
       "displayName": "General",

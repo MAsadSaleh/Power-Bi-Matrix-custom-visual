@@ -4,6 +4,7 @@
  */
 
 /// <reference path="../node_modules/powerbi-visuals-api/index.d.ts"/>
+import * as d3 from "d3";
 import { FormattingSettingsService } from "./formattingSettings";
 import { MatrixDataModel } from "./dataModel";
 import { RenderingEngine } from "./rendering";
@@ -42,7 +43,7 @@ export class MatrixVisualReplica implements powerbi.extensibility.visual.IVisual
         );
         
         // Setup event handlers
-        this.setupEventHandlers();
+        // this.setupEventHandlers();
     }
 
     public update(options: powerbi.extensibility.visual.VisualUpdateOptions) {
@@ -62,16 +63,41 @@ export class MatrixVisualReplica implements powerbi.extensibility.visual.IVisual
             // Update formatting settings
             this.formattingSettings.update(options.dataViews);
 
-            // Process data
-            const matrixDataView: powerbi.DataViewMatrix = dataView.matrix;
-            this.dataModel.processDataView(matrixDataView, this.expandCollapseState);
+            // Clear container
+            d3.select(this.container).selectAll("*").remove();
 
-            // Render
-            this.renderingEngine.render(
-                this.dataModel,
-                this.formattingSettings,
-                this.viewport
-            );
+            // Create table using D3
+            const table = d3.select(this.container)
+                .append("table")
+                .style("border-collapse", "collapse")
+                .style("width", "100%")
+                .style("font-family", "Segoe UI, sans-serif")
+                .style("font-size", "11px");
+
+            // Create thead
+            const thead = table.append("thead");
+            const headerRow = thead.append("tr");
+
+            // Add row header spacer
+            headerRow.append("th")
+                .style("width", "200px")
+                .style("padding", "8px")
+                .style("border", "1px solid #ddd")
+                .style("background-color", "#f8f8f8")
+                .text("Hierarchy");
+
+            // Build column headers from matrix columns
+            if (dataView.matrix.columns && dataView.matrix.columns.root) {
+                this.buildColumnHeadersD3(headerRow, dataView.matrix.columns.root, 0);
+            }
+
+            // Create tbody
+            const tbody = table.append("tbody");
+
+            // Recursively build rows from matrix rows
+            if (dataView.matrix.rows && dataView.matrix.rows.root && dataView.matrix.rows.root.children) {
+                this.buildRowsD3(tbody, dataView.matrix.rows.root.children, 0, dataView.matrix);
+            }
 
         } catch (error) {
             console.error("Error updating visual:", error);
@@ -85,20 +111,125 @@ export class MatrixVisualReplica implements powerbi.extensibility.visual.IVisual
         return this.formattingSettings.enumerateObjectInstances(options);
     }
 
-    private setupEventHandlers(): void {
-        // Expand/collapse handlers
-        this.container.addEventListener("click", (e) => {
-            const target = e.target as HTMLElement;
-            if (target.classList.contains("expand-indicator")) {
-                const path = target.getAttribute("data-path");
-                if (path) {
-                    const isExpanded = this.expandCollapseState.get(path) ?? false;
-                    this.expandCollapseState.set(path, !isExpanded);
-                    // Trigger re-render by calling update again
-                    // The expandCollapseState is already updated
+    private buildColumnHeadersD3(headerRow: d3.Selection<HTMLTableRowElement, unknown, null, undefined>, node: powerbi.DataViewMatrixNode, level: number): void {
+        if (node.children && node.children.length > 0) {
+            for (const child of node.children) {
+                this.buildColumnHeadersD3(headerRow, child, level + 1);
+            }
+        } else {
+            // Leaf node - add column header
+            headerRow.append("th")
+                .style("padding", "8px")
+                .style("border", "1px solid #ddd")
+                .style("background-color", "#f8f8f8")
+                .style("text-align", "center")
+                .style("font-weight", "600")
+                .text(node.value ? node.value.toString() : "");
+
+            // If this is the last level, add value columns (Expense and Revenue)
+            if (level === 1) { // Assuming 2-level column hierarchy
+                // Add Expense column
+                headerRow.append("th")
+                    .style("padding", "8px")
+                    .style("border", "1px solid #ddd")
+                    .style("background-color", "#f8f8f8")
+                    .style("text-align", "center")
+                    .style("font-weight", "600")
+                    .text("Expense");
+
+                // Add Revenue column
+                headerRow.append("th")
+                    .style("padding", "8px")
+                    .style("border", "1px solid #ddd")
+                    .style("background-color", "#f8f8f8")
+                    .style("text-align", "center")
+                    .style("font-weight", "600")
+                    .text("Revenue");
+            }
+        }
+    }
+
+    private buildRowsD3(tbody: d3.Selection<HTMLTableSectionElement, unknown, null, undefined>, nodes: powerbi.DataViewMatrixNode[], level: number, matrix: powerbi.DataViewMatrix): void {
+        const rows = tbody.selectAll(`.level-${level}`)
+            .data(nodes)
+            .enter()
+            .append("tr")
+            .classed(`level-${level}`, true);
+
+        // Add hierarchy cell with indentation
+        const hierarchyCells = rows.append("td")
+            .style("padding", "8px")
+            .style("border", "1px solid #ddd")
+            .style("padding-left", `${(level * 20) + 8}px`)
+            .text(d => d.value ? d.value.toString() : "");
+
+        // Add expand/collapse indicators
+        hierarchyCells.filter(d => !!(d.children && d.children.length > 0))
+            .append("span")
+            .style("margin-right", "5px")
+            .style("cursor", "pointer")
+            .text(d => this.expandCollapseState.get(d.value?.toString() || "") ? "▼" : "▶")
+            .on("click", (event, d) => {
+                const key = d.value?.toString() || "";
+                const isExpanded = this.expandCollapseState.get(key) ?? false;
+                this.expandCollapseState.set(key, !isExpanded);
+                // Trigger re-render
+                this.host.refreshHostData();
+            });
+
+        // Add data cells for each column
+        if (matrix.columns && matrix.columns.root) {
+            this.addDataCellsD3(rows, matrix.columns.root, matrix);
+        }
+
+        // Recursively add children
+        nodes.forEach(node => {
+            if (node.children && node.children.length > 0) {
+                const isExpanded = this.expandCollapseState.get(node.value?.toString() || "") ?? true;
+                if (isExpanded) {
+                    this.buildRowsD3(tbody, node.children, level + 1, matrix);
                 }
             }
         });
+    }
+
+    private addDataCellsD3(rows: d3.Selection<HTMLTableRowElement, powerbi.DataViewMatrixNode, HTMLTableSectionElement, unknown>, columnNode: powerbi.DataViewMatrixNode, matrix: powerbi.DataViewMatrix): void {
+        if (columnNode.children && columnNode.children.length > 0) {
+            for (const child of columnNode.children) {
+                this.addDataCellsD3(rows, child, matrix);
+            }
+        } else {
+            // For each leaf column, add Expense and Revenue cells
+            rows.each(((rowNode: powerbi.DataViewMatrixNode) => {
+                const row = d3.select(this as any);
+                
+                // Expense cell
+                const expenseValue = this.getCellValue(rowNode, columnNode, 0, matrix);
+                row.append("td")
+                    .style("padding", "8px")
+                    .style("border", "1px solid #ddd")
+                    .style("text-align", "right")
+                    .text(expenseValue || "");
+
+                // Revenue cell
+                const revenueValue = this.getCellValue(rowNode, columnNode, 1, matrix);
+                row.append("td")
+                    .style("padding", "8px")
+                    .style("border", "1px solid #ddd")
+                    .style("text-align", "right")
+                    .text(revenueValue || "");
+            }).bind(this));
+        }
+    }
+
+    private getCellValue(rowNode: powerbi.DataViewMatrixNode, columnNode: powerbi.DataViewMatrixNode, valueIndex: number, matrix: powerbi.DataViewMatrix): string | null {
+        // This is a simplified way to get values - in a real implementation,
+        // you'd need to properly traverse the matrix structure
+        if (rowNode.values && rowNode.values[valueIndex]) {
+            const value = rowNode.values[valueIndex].value;
+            return value ? value.toString() : null;
+        }
+        return null;
     }
 
     private clearVisual(): void {
