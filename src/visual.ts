@@ -57,9 +57,9 @@ export class MatrixVisualReplica implements powerbi.extensibility.visual.IVisual
                 return;
             }
 
-            // Defensive check for matrix structure
-            if (!dataView.matrix || !dataView.matrix.rows || !dataView.matrix.columns) {
-                console.log("Matrix structure not available");
+            // Strict matrix data handling
+            if (!dataView.matrix) {
+                console.log("No matrix data available");
                 this.clearVisual();
                 return;
             }
@@ -105,17 +105,17 @@ export class MatrixVisualReplica implements powerbi.extensibility.visual.IVisual
                 .style("font-weight", "600")
                 .text("Hierarchy");
 
-            // Build column headers from matrix columns
-            if (dataView.matrix.columns.root?.children) {
-                this.buildColumnHeadersD3(headerRow, dataView.matrix.columns.root.children, dataView.matrix);
+            // Build multi-level column headers
+            if (dataView.matrix.columns?.root?.children) {
+                this.buildColumnHeaders(headerRow, dataView.matrix.columns.root.children, dataView.matrix);
             }
 
             // Create tbody
             const tbody = table.append("tbody");
 
-            // Recursively build rows from matrix rows
-            if (dataView.matrix.rows.root?.children) {
-                this.buildMatrixRowsD3(tbody, dataView.matrix.rows.root.children, 0, dataView.matrix);
+            // Recursively render row hierarchy
+            if (dataView.matrix.rows?.root?.children) {
+                this.renderRowNodes(tbody, dataView.matrix.rows.root.children, 0, dataView.matrix);
             }
 
             console.log("Matrix Visual Update - Render completed successfully");
@@ -132,13 +132,13 @@ export class MatrixVisualReplica implements powerbi.extensibility.visual.IVisual
         return this.formattingSettings.enumerateObjectInstances(options);
     }
 
-    private buildColumnHeadersD3(headerRow: d3.Selection<HTMLTableRowElement, unknown, null, undefined>, columnNodes: powerbi.DataViewMatrixNode[], matrix: powerbi.DataViewMatrix): void {
-        console.log("Building column headers for", columnNodes.length, "column nodes");
+    private buildColumnHeaders(headerRow: d3.Selection<HTMLTableRowElement, unknown, null, undefined>, columnNodes: powerbi.DataViewMatrixNode[], matrix: powerbi.DataViewMatrix): void {
+        console.log("Building multi-level column headers for", columnNodes.length, "column nodes");
 
         columnNodes.forEach(columnNode => {
             if (columnNode.children && columnNode.children.length > 0) {
                 // Recursively build child headers
-                this.buildColumnHeadersD3(headerRow, columnNode.children, matrix);
+                this.buildColumnHeaders(headerRow, columnNode.children, matrix);
             } else {
                 // Leaf column - add headers for Month and then Expense/Revenue
                 console.log("Adding column header for:", columnNode.value);
@@ -172,27 +172,28 @@ export class MatrixVisualReplica implements powerbi.extensibility.visual.IVisual
         });
     }
 
-    private buildMatrixRowsD3(tbody: d3.Selection<HTMLTableSectionElement, unknown, null, undefined>, rowNodes: powerbi.DataViewMatrixNode[], level: number, matrix: powerbi.DataViewMatrix): void {
-        console.log("Building matrix rows for level", level, "with", rowNodes.length, "nodes");
+    private renderRowNodes(tbody: d3.Selection<HTMLTableSectionElement, unknown, null, undefined>, nodes: powerbi.DataViewMatrixNode[], depth: number, matrix: powerbi.DataViewMatrix): void {
+        console.log("Rendering row nodes at depth", depth, "with", nodes.length, "nodes");
 
-        rowNodes.forEach(rowNode => {
+        nodes.forEach(rowNode => {
             const row = tbody.append("tr");
 
-            // Add hierarchy cell with indentation
+            // Add hierarchy cell with indentation and interactivity
             const hierarchyCell = row.append("td")
                 .style("padding", "8px")
                 .style("border", "1px solid #ddd")
-                .style("padding-left", `${(level * 20) + 8}px`)
+                .style("padding-left", `${(depth * 20) + 8}px`)
                 .style("background-color", "#f8f8f8")
-                .text(rowNode.value ? rowNode.value.toString() : "");
+                .style("cursor", rowNode.children && rowNode.children.length > 0 ? "pointer" : "default")
+                .text(rowNode.value ? rowNode.value.toString() : ""); // Handle blank/null level names
 
-            // Add expand/collapse indicator if has children
+            // Add expand/collapse icons for interactivity
             if (rowNode.children && rowNode.children.length > 0) {
                 const isExpanded = this.expandCollapseState.get(rowNode.value?.toString() || "") ?? true;
 
                 hierarchyCell
-                    .style("cursor", "pointer")
                     .on("click", () => {
+                        // Update local state for expand/collapse
                         const key = rowNode.value?.toString() || "";
                         const currentlyExpanded = this.expandCollapseState.get(key) ?? true;
                         this.expandCollapseState.set(key, !currentlyExpanded);
@@ -206,33 +207,33 @@ export class MatrixVisualReplica implements powerbi.extensibility.visual.IVisual
                     .text(isExpanded ? "▼" : "▶");
             }
 
-            // Add data cells for each column combination
-            if (matrix.columns.root?.children) {
-                this.addMatrixDataCellsD3(row, matrix.columns.root.children, rowNode, matrix);
+            // Add data cells for dual measures (Expense and Revenue)
+            if (matrix.columns?.root?.children) {
+                this.renderDataCells(row, matrix.columns.root.children, rowNode, matrix);
             }
 
-            // Recursively add children if expanded
+            // Recursively render children if expanded
             if (rowNode.children && rowNode.children.length > 0) {
                 const isExpanded = this.expandCollapseState.get(rowNode.value?.toString() || "") ?? true;
                 if (isExpanded) {
-                    this.buildMatrixRowsD3(tbody, rowNode.children, level + 1, matrix);
+                    this.renderRowNodes(tbody, rowNode.children, depth + 1, matrix);
                 }
             }
         });
     }
 
-    private addMatrixDataCellsD3(row: d3.Selection<HTMLTableRowElement, unknown, null, undefined>, columnNodes: powerbi.DataViewMatrixNode[], rowNode: powerbi.DataViewMatrixNode, matrix: powerbi.DataViewMatrix): void {
+    private renderDataCells(row: d3.Selection<HTMLTableRowElement, unknown, null, undefined>, columnNodes: powerbi.DataViewMatrixNode[], rowNode: powerbi.DataViewMatrixNode, matrix: powerbi.DataViewMatrix): void {
         columnNodes.forEach(columnNode => {
             if (columnNode.children && columnNode.children.length > 0) {
-                // Recursively add cells for child columns
-                this.addMatrixDataCellsD3(row, columnNode.children, rowNode, matrix);
+                // Recursively render child cells
+                this.renderDataCells(row, columnNode.children, rowNode, matrix);
             } else {
                 // For each leaf column, add Expense and Revenue cells
-                // Get values from the row node's values array
+                // Iterate through node.values to get both measures
                 const expenseValue = this.getMatrixCellValue(rowNode, 0); // Expense is typically index 0
                 const revenueValue = this.getMatrixCellValue(rowNode, 1); // Revenue is typically index 1
 
-                console.log("Adding cells for row:", rowNode.value, "expense:", expenseValue, "revenue:", revenueValue);
+                console.log("Rendering cells for row:", rowNode.value, "expense:", expenseValue, "revenue:", revenueValue);
 
                 // Expense cell
                 row.append("td")

@@ -10,9 +10,9 @@ export declare class MatrixVisualReplica implements powerbi.extensibility.visual
     constructor(options?: powerbi.extensibility.visual.VisualConstructorOptions);
     update(options: powerbi.extensibility.visual.VisualUpdateOptions): void;
     enumerateObjectInstances(options: powerbi.EnumerateVisualObjectInstancesOptions): powerbi.VisualObjectInstanceEnumeration;
-    private buildColumnHeadersD3;
-    private buildMatrixRowsD3;
-    private addMatrixDataCellsD3;
+    private buildColumnHeaders;
+    private renderRowNodes;
+    private renderDataCells;
     private getMatrixCellValue;
     private clearVisual;
     private showError;
