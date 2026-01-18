@@ -13,6 +13,7 @@ export declare class MatrixVisualReplica implements powerbi.extensibility.visual
     private buildColumnHeaders;
     private renderRowNodes;
     private renderDataCells;
+    private formatMatrixCellValue;
     private getMatrixCellValue;
     private clearVisual;
     private showError;

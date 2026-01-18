@@ -13,41 +13,49 @@
     overflow: hidden;
 }
 
-.matrix-table-wrapper {
-    position: relative;
-    width: 100%;
+.matrix-scroll-container {
     height: 100%;
-    overflow: auto;
+    width: 100%;
+    overflow: auto !important;
 }
 
-.matrix-header-wrapper {
+.matrix-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 11px;
+}
+
+.matrix-table thead {
     position: sticky;
     top: 0;
-    z-index: 10;
     background-color: #ffffff;
+    z-index: 10;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.matrix-body-wrapper {
-    position: relative;
+.matrix-table thead th {
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
-.matrix-row-header-wrapper {
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 11;
-    background-color: #ffffff;
-    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+.matrix-table tbody td {
+    border: 1px solid #ddd;
+    padding: 8px;
 }
 
-.matrix-header-table,
-.matrix-body-table,
-.matrix-row-header-table {
-    border-collapse: collapse;
-    width: 100%;
-    table-layout: auto;
+.matrix-table tbody td:first-child {
+    background-color: #f8f8f8;
+    font-weight: 500;
+}
+
+.matrix-table tbody td:not(:first-child) {
+    text-align: right;
+}
     font-size: 11px;
 }
 

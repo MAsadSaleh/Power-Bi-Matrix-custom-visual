@@ -83,9 +83,17 @@ export class MatrixVisualReplica implements powerbi.extensibility.visual.IVisual
             // Clear container using D3
             d3.select(this.container).selectAll("*").remove();
 
+            // Create scrollable container div
+            const scrollContainer = d3.select(this.container)
+                .append("div")
+                .classed("matrix-scroll-container", true)
+                .style("height", "100%")
+                .style("width", "100%")
+                .style("overflow", "auto");
+
             // Create table using D3
-            const table = d3.select(this.container)
-                .append("table")
+            const table = scrollContainer.append("table")
+                .classed("matrix-table", true)
                 .style("border-collapse", "collapse")
                 .style("width", "100%")
                 .style("font-family", "Segoe UI, sans-serif")
@@ -178,6 +186,11 @@ export class MatrixVisualReplica implements powerbi.extensibility.visual.IVisual
         nodes.forEach(rowNode => {
             const row = tbody.append("tr");
 
+            // Create unique SelectionId for this node
+            const selectionId = this.host.createSelectionIdBuilder()
+                .withMatrixNode(rowNode, matrix.rows.levels || [])
+                .createSelectionId();
+
             // Add hierarchy cell with indentation and interactivity
             const hierarchyCell = row.append("td")
                 .style("padding", "8px")
@@ -189,22 +202,26 @@ export class MatrixVisualReplica implements powerbi.extensibility.visual.IVisual
 
             // Add expand/collapse icons for interactivity
             if (rowNode.children && rowNode.children.length > 0) {
-                const isExpanded = this.expandCollapseState.get(rowNode.value?.toString() || "") ?? true;
+                // Use node.isCollapsed property to determine state
+                const isCollapsed = rowNode.isCollapsed ?? false;
+                const icon = isCollapsed ? "+" : "-";
 
                 hierarchyCell
                     .on("click", () => {
-                        // Update local state for expand/collapse
-                        const key = rowNode.value?.toString() || "";
-                        const currentlyExpanded = this.expandCollapseState.get(key) ?? true;
-                        this.expandCollapseState.set(key, !currentlyExpanded);
-                        // Trigger re-render
-                        this.host.refreshHostData();
+                        // Use selectionManager for proper Power BI expand/collapse
+                        if ((this.host as any).selectionManager) {
+                            (this.host as any).selectionManager.toggleExpandCollapse(selectionId);
+                        } else {
+                            // Fallback: trigger re-render to let Power BI handle expand/collapse
+                            this.host.refreshHostData();
+                        }
                     });
 
-                // Add expand/collapse text
+                // Add expand/collapse icon
                 hierarchyCell.append("span")
                     .style("margin-right", "5px")
-                    .text(isExpanded ? "▼" : "▶");
+                    .style("font-weight", "bold")
+                    .text(icon);
             }
 
             // Add data cells for dual measures (Expense and Revenue)
@@ -212,12 +229,9 @@ export class MatrixVisualReplica implements powerbi.extensibility.visual.IVisual
                 this.renderDataCells(row, matrix.columns.root.children, rowNode, matrix);
             }
 
-            // Recursively render children if expanded
-            if (rowNode.children && rowNode.children.length > 0) {
-                const isExpanded = this.expandCollapseState.get(rowNode.value?.toString() || "") ?? true;
-                if (isExpanded) {
-                    this.renderRowNodes(tbody, rowNode.children, depth + 1, matrix);
-                }
+            // Recursively render children if not collapsed
+            if (rowNode.children && rowNode.children.length > 0 && !rowNode.isCollapsed) {
+                this.renderRowNodes(tbody, rowNode.children, depth + 1, matrix);
             }
         });
     }
@@ -229,27 +243,71 @@ export class MatrixVisualReplica implements powerbi.extensibility.visual.IVisual
                 this.renderDataCells(row, columnNode.children, rowNode, matrix);
             } else {
                 // For each leaf column, add Expense and Revenue cells
-                // Iterate through node.values to get both measures
-                const expenseValue = this.getMatrixCellValue(rowNode, 0); // Expense is typically index 0
-                const revenueValue = this.getMatrixCellValue(rowNode, 1); // Revenue is typically index 1
+                // Loop through node.values array to get both measures
+                if (rowNode.values) {
+                    // Expense cell (index 0)
+                    const expenseValue = this.formatMatrixCellValue(rowNode, 0, matrix);
+                    row.append("td")
+                        .style("padding", "8px")
+                        .style("border", "1px solid #ddd")
+                        .style("text-align", "right")
+                        .text(expenseValue);
 
-                console.log("Rendering cells for row:", rowNode.value, "expense:", expenseValue, "revenue:", revenueValue);
+                    // Revenue cell (index 1)
+                    const revenueValue = this.formatMatrixCellValue(rowNode, 1, matrix);
+                    row.append("td")
+                        .style("padding", "8px")
+                        .style("border", "1px solid #ddd")
+                        .style("text-align", "right")
+                        .text(revenueValue);
+                } else {
+                    // Empty cells if no values
+                    row.append("td")
+                        .style("padding", "8px")
+                        .style("border", "1px solid #ddd")
+                        .style("text-align", "right")
+                        .text("");
 
-                // Expense cell
-                row.append("td")
-                    .style("padding", "8px")
-                    .style("border", "1px solid #ddd")
-                    .style("text-align", "right")
-                    .text(expenseValue || "");
-
-                // Revenue cell
-                row.append("td")
-                    .style("padding", "8px")
-                    .style("border", "1px solid #ddd")
-                    .style("text-align", "right")
-                    .text(revenueValue || "");
+                    row.append("td")
+                        .style("padding", "8px")
+                        .style("border", "1px solid #ddd")
+                        .style("text-align", "right")
+                        .text("");
+                }
             }
         });
+    }
+
+    private formatMatrixCellValue(rowNode: powerbi.DataViewMatrixNode, valueIndex: number, matrix: powerbi.DataViewMatrix): string {
+        try {
+            if (!rowNode.values || !rowNode.values[valueIndex]) {
+                return "";
+            }
+
+            const value = rowNode.values[valueIndex];
+            if (value && typeof value === 'object' && 'value' in value) {
+                const cellValue = (value as any).value;
+
+                // Use valueSources for formatting if available
+                if (matrix.valueSources && matrix.valueSources[valueIndex]) {
+                    const formatString = matrix.valueSources[valueIndex].format;
+                    // Simple formatting fallback since formatService may not be available
+                    if (formatString && formatString.includes('Currency')) {
+                        return new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: 'USD'
+                        }).format(cellValue);
+                    }
+                }
+
+                // Fallback formatting
+                return cellValue != null ? cellValue.toString() : "";
+            }
+            return "";
+        } catch (error) {
+            console.error("Error formatting matrix cell value:", error);
+            return "";
+        }
     }
 
     private getMatrixCellValue(rowNode: powerbi.DataViewMatrixNode, valueIndex: number): string | null {
